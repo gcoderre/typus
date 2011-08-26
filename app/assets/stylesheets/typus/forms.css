@@ -8,8 +8,9 @@ fieldset ol {
 }
 
 fieldset ol li {
+  line-height: 1.5em;
   list-style: none!important;
-  margin: 1em 0!important;
+  margin: 1em 0;
 }
 
 fieldset small {
@@ -57,4 +58,13 @@ fieldset.buttons {
 
   fieldset.buttons ol li {
     display: inline;
+  }
+
+fieldset ol ul {
+  margin: 0!important;
+}
+
+  fieldset ol ul label.inline_label {
+    display: inline;
+    font-weight: normal;
   }

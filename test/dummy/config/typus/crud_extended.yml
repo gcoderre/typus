@@ -10,9 +10,8 @@ Asset:
 Case:
   fields:
     default: title
-    form: title, content
+    form: title, content, categories
   application: CRUD Extended
-  relationships: categories
 
 Comment:
   fields:
@@ -37,21 +36,20 @@ Page:
   options:
     form_rows: 25
     sortable: false
+    export: csv
   application: CRUD Extended
 
 Post:
   fields:
     default: title, body, created_at, status, published_at
     list: title, created_at, status
-    form: title, body, created_at, status, published_at
+    form: title, body, created_at, status, published_at, categories
     relationship: title, created_at
     csv: title, status
     xml: title, status
     show: title, body, status, published, created_at
     options:
       selectors: status
-      read_only: permalink
-      auto_generated: created_at
       date_formats:
         created_at: short
       templates:
@@ -64,7 +62,7 @@ Post:
   filters: status, created_at
   search: title
   order_by: title, -created_at
-  export: csv, xml
+  scopes: published, draft, unexisting
   application: CRUD Extended
 
 Article::Entry:
@@ -76,4 +74,17 @@ Article::Entry:
         published: ["Yes", "No"]
   search: title
   filters: published
+  application: CRUD Extended
+
+EntryDefault:
+  fields:
+    options:
+      booleans:
+        published: ["Yes", "No"]
+  filters: published
+  application: CRUD Extended
+
+ReadOnlyEntry:
+  fields:
+    default: title, content, published
   application: CRUD Extended

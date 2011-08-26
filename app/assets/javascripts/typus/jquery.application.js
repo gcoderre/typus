@@ -20,6 +20,20 @@ $(document).ready(function() {
         'type': 'iframe',
         'centerOnScroll': true,
         'scrolling': false,
+        'onClosed': function() {
+          parent.location.reload(true);
+        },
+    });
+
+    $(".iframe_without_reload").fancybox({
+        'width': 720,
+        'height': '90%',
+        'autoScale': false,
+        'transitionIn': 'none',
+        'transitionOut': 'none',
+        'type': 'iframe',
+        'centerOnScroll': true,
+        'scrolling': false,
     });
 
     // This method is used by Typus::Controller::Bulk
@@ -28,6 +42,8 @@ $(document).ready(function() {
         $('input.action-select').each(function() { this.checked = status; });
         $('.action-toggle').each(function() { this.checked = status; });
     });
+
+    $(".chzn-select").chosen();
 
 });
 

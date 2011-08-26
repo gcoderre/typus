@@ -15,27 +15,16 @@ title(page_title)
       <small><%= list_actions %></small>
     </h2>
   </div>
-
-  <% if flash[:notice] && headless_mode? %>
-  <script>
-  $(document).ready(function() { parent.location.reload(); });
-  </script>
-  <% end %>
-
-  <%
-  options = params.dup.cleanup.merge!(:action => 'update')
-  button = Typus::I18n.t("Save %{resource}", :resource => @resource.model_name.human)
-  %>
-
-  <%= render :partial => 'form', :locals => { :options => options, :button => button } %>
+  
+  <% locals = { :options => params.dup.cleanup.merge!(:action => 'update') } %>
+  <%= render 'form', locals %>
 </div>
 
 <%= typus_relationships unless headless_mode? %>
-
 <% end %>
 
 <div class="grid_2">
-  <%= build_sidebar.present? ? build_sidebar : render("admin/templates/profile_sidebar") %>
+  <%= build_sidebar || render("admin/templates/profile_sidebar") %>
 </div>
 
 <div class="grid_8">

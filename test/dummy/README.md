@@ -1,8 +1,8 @@
-# Typus Demo
+# Dummy
 
 This is the Rails application used to test **Typus** and to demo it.
 
-You can see it working at <http://demo.typuscms.com/>.
+You can see it working at <http://demo.typuscmf.com/>.
 
 ## Installation
 
@@ -16,8 +16,3 @@ Clone the repository:
     $ bundle exec rails server
 
 Open your browser and go to <http://localhost:3000/>.
-
-## MongoDB
-
-If you want to see the `MongoDB` support rename the file `config/mongoid.yml.example`
-and set your **MongoDB** settings.

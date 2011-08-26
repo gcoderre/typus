@@ -14,7 +14,7 @@ Dummy::Application.configure do
   config.action_controller.perform_caching = false
 
   # Don't care if the mailer can't send
-  config.action_mailer.raise_delivery_errors = false
+  config.action_mailer.raise_delivery_errors = true
 
   # Print deprecation notices to the Rails logger
   config.active_support.deprecation = :log
@@ -24,14 +24,16 @@ Dummy::Application.configure do
 
   # Do not compress assets
   config.assets.compress = false
+
+  # Default url options for action mailer
+  config.action_mailer.default_url_options = { :host => 'localhost:3000' }
 end
 
 Typus.setup do |config|
-  config.config_folder = Rails.root.join("config/typus")
   config.mailer_sender = "admin@example.com"
 
   # Authenticate using `:none_with_role`
-  config.authentication = :none_with_role
+  # config.authentication = :none_with_role
 
   # Authenticate using `:http_basic` authentication.
   # config.authentication = :http_basic
@@ -39,8 +41,8 @@ Typus.setup do |config|
   # config.password = 'columbia'
 
   # Authenticate using typus provided authentication.
-  # config.authentication = :session
-  # config.user_class_name = "AdminUser"
+  config.authentication = :session
+  config.user_class_name = "AdminUser"
 
   # Authenticate using devise.
   # config.authentication = :devise

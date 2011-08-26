@@ -12,21 +12,17 @@ most common settings.
         show: title, category, is_published?
         relationship: title, status
         options:
-          auto_generated:
           booleans:
             is_published: ["Yes, it is", "No, it isn't"]
           date_formats:
             created_at: post_long
           selectors:
-          read_only:
-          filter_by_date_range: valid_until
           templates:
             body: rich_text
       actions:
         index: cleanup
         edit: send_as_newsletter
         show: rebuild
-      export: csv, xml
       order_by: created_at
       relationships:
       filters: is_published?, created_at, category_id
@@ -34,16 +30,14 @@ most common settings.
       application: Application
       description: Some text to describe the model
       options:
+        export: csv, xml
         default_action_on_item: show
         end_year: 2015
         form_rows: 25
         minute_step: 15
-        nil: 'nil'
         only_user_items: true
         per_page: 25
         start_year: 1990
-
-Note: To define namespace models use :: as a separator. (i.e. Delayed::Job)
 
 # Roles
 

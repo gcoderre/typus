@@ -220,14 +220,13 @@ class ClassMethodsTest < ActiveSupport::TestCase
   end
 
   test "typus_application" do
+    assert_equal "CRUD", Entry.typus_application
     assert_equal "CRUD Extended", Post.typus_application
     assert_equal "Unknown", View.typus_application
   end
 
   test "typus_field_options_for" do
     assert_equal [:status], Post.typus_field_options_for(:selectors)
-    assert_equal [:permalink], Post.typus_field_options_for(:read_only)
-    assert_equal [:created_at], Post.typus_field_options_for(:auto_generated)
 
     assert Post.typus_field_options_for(:unexisting).empty?
   end

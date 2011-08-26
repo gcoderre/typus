@@ -1,8 +1,6 @@
 class Admin::ResourcesController < Admin::BaseController
 
   include Typus::Controller::Actions
-  include Typus::Controller::Associations
-  include Typus::Controller::Autocomplete
   include Typus::Controller::Filters
   include Typus::Controller::Format
   include Typus::Controller::Headless
@@ -10,17 +8,11 @@ class Admin::ResourcesController < Admin::BaseController
   Whitelist = [:edit, :update, :destroy, :toggle, :position, :relate, :unrelate]
 
   before_filter :get_model
-  before_filter :set_context # MultiSite ...
+  before_filter :set_context
   before_filter :get_object, :only => Whitelist + [:show]
   before_filter :check_resource_ownership, :only => Whitelist
   before_filter :check_if_user_can_perform_action_on_resources
 
-  ##
-  # This is the main index of the model. With filters, conditions and more.
-  #
-  # By default application can respond to html, csv and xml, but you can add
-  # your formats.
-  #
   def index
     get_objects
 
@@ -29,7 +21,7 @@ class Admin::ResourcesController < Admin::BaseController
         if headless_mode_with_custom_action_is_enabled?
           set_headless_resource_actions
         else
-          add_resource_action(default_action.titleize, {:action => default_action}, {})
+          set_default_action
           add_resource_action("Trash", {:action => "destroy"}, {:confirm => "#{Typus::I18n.t("Trash")}?", :method => 'delete'})
         end
         generate_html
@@ -50,11 +42,6 @@ class Admin::ResourcesController < Admin::BaseController
     end
   end
 
-  ##
-  # Create new items. There's an special case when we create an item from
-  # another item. In this case, after the item is created we also create the
-  # relationship between these items.
-  #
   def create
     @item = @resource.new
     @item.assign_attributes(params[@object_name], :as => :admin)
@@ -72,8 +59,7 @@ class Admin::ResourcesController < Admin::BaseController
     end
   end
 
-  def edit
-  end
+  def edit; end
 
   def show
     check_resource_ownership if @resource.typus_options_for(:only_user_items)
@@ -166,6 +152,13 @@ class Admin::ResourcesController < Admin::BaseController
 
   # Here we set the current scope!
   def set_scope
+    if (scope = params[:scope])
+     if @resource.respond_to?(scope)
+       @resource = @resource.send(scope)
+     else
+       not_allowed
+     end
+   end
   end
 
   def set_wheres
@@ -197,47 +190,24 @@ class Admin::ResourcesController < Admin::BaseController
   def redirect_on_success
     path = params.dup.cleanup
 
-    # Redirects to { :action => 'index' }
     if params[:_save]
-      path.delete_if { |k, v| %w(action id).include?(k) }
+      path.delete_if { |k, v| %w(action id).include?(k) } # Redirects to { :action => 'index' }
+    elsif params[:_addanother]
+      path.merge!(:action => 'new', :id => nil) # Redirects to { :action => 'new' }
+    elsif params[:_continue]
+      path.merge!(:action => 'edit', :id => @item.id) # Redirects to { :action => 'edit' => :id => @item.id }
     end
 
-    ##
-    # Here what we basically do is to associate objects after they have been
-    # created. It's similar to calling `relate` but which the difference that
-    # we are creating a new record.
-    #
-    # We have two objects, detect the relationship_between them and then
-    # call the related method.
-    #
-    if params[:_saveandassign]
-      item_class = params[:resource].constantize
-      # For some reason we are forced to set the /admin prefix to the controller
-      # when working with namespaced stuff.
-      options = { :controller => "/admin/#{item_class.to_resource}" }
-      assoc = item_class.relationship_with(@resource).to_s
-      unused_path, notice, alert = send("set_#{assoc}_association", item_class, options)
-      path.merge!(:action => 'edit', :id => @item.id)
-    end
-
-    # Redirects to { :action => 'new' }
-    if params[:_addanother]
-      path.merge!(:action => 'new', :id => nil)
-    end
-
-    # Redirects to { :action => 'edit' => :id => @item.id }
-    if params[:_continue]
-      path.merge!(:action => 'edit', :id => @item.id)
-    end
-
-    message = (params[:action] == 'create') ? "%{model} successfully created." : "%{model} successfully updated."
+    message = params[:action].eql?('create') ? "%{model} successfully created." : "%{model} successfully updated."
     notice = Typus::I18n.t(message, :model => @resource.model_name.human)
 
     redirect_to path, :notice => notice
   end
 
-  def default_action
-    @resource.typus_options_for(:default_action_on_item)
+  def set_default_action
+    default_action = @resource.typus_options_for(:default_action_on_item)
+    action = admin_user.can?('edit', @resource) ? default_action : "show"
+    add_resource_action(action.titleize, {:action => action}, {})
   end
 
 end

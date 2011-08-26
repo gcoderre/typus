@@ -13,6 +13,8 @@ module Admin::Resources::FormHelper
                   typus_template_field(key, value, form)
                 when :template
                   typus_template_field(key, template, form)
+                when :has_and_belongs_to_many
+                  typus_has_and_belongs_to_many_field(key, form)
                 else
                   typus_template_field(key, :string, form)
                 end
@@ -29,13 +31,21 @@ module Admin::Resources::FormHelper
 
     html_options = attribute_disabled?(attribute) ? { :disabled => 'disabled' } : {}
 
+    label_text = @resource.human_attribute_name(attribute)
+
+=begin
+    if options[:disabled] == true
+      label_text += " <small>#{Typus::I18n.t("Read only")}</small>"
+    end
+=end
+
     locals = { :resource => @resource,
                :attribute => attribute,
                :attribute_id => "#{@resource.table_name}_#{attribute}",
                :options => options,
                :html_options => html_options,
                :form => form,
-               :label_text => @resource.human_attribute_name(attribute) }
+               :label_text => label_text.html_safe }
 
     render "admin/templates/#{template}", locals
   end
@@ -59,7 +69,7 @@ module Admin::Resources::FormHelper
 
   def save_options_for_headless_mode
     return unless headless_mode?
-    params[:resource] ? { "_saveandassign" => "Save and assign" } : { "_continue" => "Save and continue editing" }
+    { "_continue" => "Save and continue editing" }
   end
 
   def save_options_for_user_class

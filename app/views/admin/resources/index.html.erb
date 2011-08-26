@@ -1,43 +1,46 @@
 <%
-  page_title = @resource.model_name.human.pluralize
-  title(page_title)
+page_title = @resource.model_name.human(:count => 2)
+title(page_title)
 %>
 
 <% content_for :main_grid do %>
+<%= display_flash_message %>
+<%= render 'index' %>
 
-  <%= display_flash_message %>
-  <%= render 'index' %>
-
-  <div class="boxed">
+<div class="boxed">
+  
   <div class="page-heading padded clearfix">
-    <h2>
-      <%= page_title %>
-      <small><%= list_actions %></small>
-    </h2>
-    
+    <h2><%= page_title %></h2>
     <aside>
     <ul class="predefined_filters">
       <li><%= link_to Typus::I18n.t("All"), params.dup.cleanup.merge(:action => 'index') %> (<%= resource.count %>)</li>
-      <% predefined_filters.each do |filter, action, scope| %>
-        <% url = action.is_a?(String) ? params.dup.cleanup.merge(:action => action) : action %>
-        <li><%= link_to Typus::I18n.t(filter), url %> <%= "(#{@resource.send(scope).count})" if scope && @resource.respond_to?(scope) %></li>
+
+      <% scopes.each do |scope| %>
+      <li><%= link_to Typus::I18n.t(scope.humanize), :scope => scope %> <%= "(#{@resource.send(scope).count})" %></li>
       <% end %>
-      <% unless resource.count.zero? %>
-        <li>|</li>
-        <li><%= link_to "CSV", :format => 'csv' %></li>
-        <li><%= link_to "XML", :format => 'xml' %></li>
+
+      <% predefined_filters.each do |filter, action, scope| %>
+      <% url = action.is_a?(String) ? params.dup.cleanup.merge(:action => action) : action %>
+      <li><%= link_to Typus::I18n.t(filter), url %> <%= "(#{@resource.send(scope).count})" if scope && @resource.respond_to?(scope) %></li>
+      <% end %>
+
+      <% if resource.any? && (formats = resource.typus_options_for(:export).extract_settings).any? %>
+      <li>|</li>
+      <% formats.each do |format| %>
+      <li><%= link_to format.upcase, :format => format %></li>
+      <% end %>
       <% end %>
     </ul>
     </aside>
   </div>
-
+  
   <% if (build_filters || search) %>
     <div class="filters">
       <%= build_filters %>
       <%= search %>
     </div>
   <% end %>
-
+  
   <% if @items.any? -%>
     <div class="padded">
     <% if controller.respond_to?(:bulk) %>
@@ -48,11 +51,12 @@
     <%= paginate(@items, Typus.pagination) %>
     </div>
   <% else %>
-    <div class="padded">
-      <p><%= Typus::I18n.t("No %{resources} found.", :resources => @resource.model_name.human.downcase.pluralize) %></p>
-    </div>
-  <% end %>
+  
+  <div class="padded">
+    <p><%= Typus::I18n.t("No %{resources} found.", :resources => @resource.model_name.human(:count => 2)) %></p>
   </div>
+  <% end %>
+</div>
 
 <% end %>
 

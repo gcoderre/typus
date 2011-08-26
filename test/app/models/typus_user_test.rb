@@ -126,23 +126,30 @@ class TypusUserTest < ActiveSupport::TestCase
 
   test "admin gets a list of application resources for crud extended application" do
     typus_user = FactoryGirl.build(:typus_user)
-    assert_equal ["Asset", "Case", "Comment", "Page", "Post", "Article::Entry"], typus_user.application("CRUD Extended")
+    # OPTIMIZE: There's no need to sort stuff but this is required to make it
+    #           work with Ruby 1.8.7.
+    expected = %w(Asset Case Comment EntryDefault Page Post Article::Entry ReadOnlyEntry).sort
+    assert_equal expected, typus_user.application("CRUD Extended").sort
   end
 
   test "admin gets a list of application resources for Admin application" do
     typus_user = FactoryGirl.build(:typus_user)
-    assert_equal %w(AdminUser TypusUser DeviseUser), typus_user.application("Admin")
+    # OPTIMIZE: There's no need to sort stuff but this is required to make it
+    #           work with Ruby 1.8.7.
+    expected = %w(AdminUser TypusUser DeviseUser).sort
+    assert_equal expected, typus_user.application("Admin").sort
   end
 
   test "editor get a list of all applications" do
     typus_user = FactoryGirl.build(:typus_user, :role => "editor")
-    assert_equal ["Admin", "CRUD Extended"], typus_user.applications
+    expected = ["Admin", "CRUD Extended"]
+    expected.each { |e| assert Typus.applications.include?(e) }
   end
 
   test "editor gets a list of application resources" do
     typus_user = FactoryGirl.build(:typus_user, :role => "editor")
     assert_equal %w(Comment Post), typus_user.application("CRUD Extended")
-    assert_equal %w(TypusUser), typus_user.application("Admin")
+    assert_equal %w(), typus_user.application("Admin")
   end
 
   test "user owns a resource" do

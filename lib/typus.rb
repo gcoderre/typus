@@ -23,8 +23,6 @@ module Typus
     autoload :Actions, "typus/controller/actions"
     autoload :ActsAsList, "typus/controller/acts_as_list"
     autoload :Ancestry, "typus/controller/ancestry"
-    autoload :Associations, "typus/controller/associations"
-    autoload :Autocomplete, "typus/controller/autocomplete"
     autoload :Bulk, "typus/controller/bulk"
     autoload :FeaturedImage, "typus/controller/featured_image"
     autoload :Filters, "typus/controller/filters"
@@ -43,15 +41,12 @@ module Typus
     autoload :Session, "typus/authentication/session"
   end
 
-  mattr_accessor :autocomplete
-  @@autocomplete = nil
-
   mattr_accessor :admin_title
   @@admin_title = "Typus"
 
   mattr_accessor :admin_sub_title
   @@admin_sub_title = <<-CODE
-<a href="http://core.typuscms.com/">core.typuscms.com</a>
+<a href="http://core.typuscmf.com/">core.typuscmf.com</a>
   CODE
 
   ##
@@ -122,6 +117,9 @@ module Typus
   mattr_accessor :image_thumb_size
   @@image_thumb_size = 'x100'
 
+  mattr_accessor :image_table_thumb_size
+  @@image_table_thumb_size = '25x25#'
+
   ##
   # Defines the default relationship table.
   #
@@ -150,12 +148,26 @@ module Typus
     end
 
     def applications
-      Typus::Configuration.config.map { |i| i.last["application"] }.compact.uniq.sort
+      hash = {}
+
+      Typus::Configuration.config.map { |i| i.last["application"] }.compact.uniq.each do |app|
+        settings = app.extract_settings
+        hash[settings.first] = settings.size > 1 ? settings.last : 1000
+      end
+
+      hash.sort { |a1, a2| a1[1].to_i <=> a2[1].to_i }.map { |i| i.first }
     end
 
     # Lists modules of an application.
     def application(name)
-      Typus::Configuration.config.map { |i| i.first if i.last["application"] == name }.compact.uniq
+      array = []
+
+      Typus::Configuration.config.each do |i|
+        settings = i.last["application"]
+        array << i.first if settings && settings.extract_settings.first.eql?(name)
+      end
+
+      array.compact.uniq
     end
 
     # Lists models from the configuration file.
@@ -185,17 +197,43 @@ module Typus
       detect_application_models.map do |model|
         class_name = model.sub(/\.rb$/,"").camelize
         klass = class_name.split("::").inject(Object) { |klass,part| klass.const_get(part) }
-        class_name if klass < ActiveRecord::Base && !klass.abstract_class?
+        class_name if is_active_record?(klass) || is_mongoid?(klass)
       end.compact
     end
+
+    def is_active_record?(klass)
+      (defined?(ActiveRecord) && klass < ActiveRecord::Base && !klass.abstract_class?)
+    end
+    private :is_active_record?
+
+    def is_mongoid?(klass)
+      (defined?(Mongoid) && klass < Mongoid::Document)
+    end
+    private :is_mongoid?
 
     def user_class
       user_class_name.constantize
     end
 
+    def root
+      Rails.root.join(config_folder)
+    end
+
+    def model_configuration_files
+      app = Typus.root.join("*.yml")
+      plugins = Rails.root.join("vendor", "plugins", "*", "config", "typus", "*.yml")
+      Dir[app, plugins].reject { |f| f.match(/_roles.yml/) }.sort
+    end
+
+    def role_configuration_files
+      app = Typus.root.join("*_roles.yml")
+      plugins = Rails.root.join("vendor", "plugins", "*", "config", "typus", "*_roles.yml")
+      Dir[app, plugins].sort
+    end
+
     def reload!
       Typus::Configuration.roles!
-      Typus::Configuration.config!
+      Typus::Configuration.models!
     end
 
   end

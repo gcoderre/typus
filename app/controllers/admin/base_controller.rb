@@ -8,8 +8,7 @@ class Admin::BaseController < ActionController::Base
 
   helper_method :admin_user
 
-  def user_guide
-  end
+  def user_guide; end
 
   protected
 
@@ -27,6 +26,10 @@ class Admin::BaseController < ActionController::Base
 
   def zero_users
     Typus.user_class.count.zero?
+  end
+
+  def not_allowed
+    render :text => "Not allowed!", :status => :unprocessable_entity
   end
 
 end

@@ -36,10 +36,12 @@ Dummy::Application.configure do
 
   # Print deprecation notices to the stderr
   config.active_support.deprecation = :stderr
+
+  # Default url options for action mailer
+  config.action_mailer.default_url_options = { :host => 'test.host' }
 end
 
 Typus.setup do |config|
-  config.config_folder = Rails.root.join("config/typus")
   config.authentication = :session
   config.user_class_name = "TypusUser"
   config.user_foreign_key = "typus_user_id"

@@ -1,13 +1,13 @@
 module Admin::Resources::DisplayHelper
 
+  def mdash
+    "&mdash;".html_safe
+  end
+
   def build_display(item, fields)
     fields.map do |attribute, type|
-      value = if (type == :boolean) || (data = item.send(attribute)).present?
-                send("display_#{type}", item, attribute)
-              else
-                "&mdash;".html_safe
-              end
-
+      condition = (type == :boolean) || item.send(attribute).present?
+      value = condition ? send("display_#{type}", item, attribute) : mdash
       [@resource.human_attribute_name(attribute), value]
     end
   end
@@ -16,9 +16,10 @@ module Admin::Resources::DisplayHelper
     String.new.tap do |html|
       @resource.typus_defaults_for(:relationships).each do |relationship|
         association = @resource.reflect_on_association(relationship.to_sym)
-        next if association.macro == :belongs_to
-        next if admin_user.cannot?('read', association.class_name.constantize)
-        html << send("typus_form_#{association.macro}", relationship)
+        macro, klass = association.macro, association.class_name.constantize
+        if [:has_many, :has_one].include?(macro) && admin_user.can?('read', klass)
+          html << send("typus_form_#{macro}", relationship)
+        end
       end
     end.html_safe
   end

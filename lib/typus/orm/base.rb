@@ -46,7 +46,8 @@ module Typus
       end
 
       def typus_application
-        read_model_config['application'] || 'Unknown'
+        name = read_model_config['application'] || 'Unknown'
+        name.extract_settings.first
       end
 
       def typus_field_options_for(filter)
@@ -55,14 +56,14 @@ module Typus
       end
 
       #--
-      # With Typus::Resources we some application defaults.
+      # With +Typus::Resources.setup+ we can define application defaults.
       #
       #     Typus::Resources.setup do |config|
       #       config.per_page = 25
       #     end
       #
       # If for any reason we need a better default for an specific resource we
-      # we override it on `application.yaml`.
+      # can override it on +application.yaml+.
       #
       #     Post:
       #       ...

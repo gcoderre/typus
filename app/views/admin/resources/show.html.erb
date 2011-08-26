@@ -26,9 +26,7 @@
   </div>
 </div>
 
-<div class="boxed">
-  <%= typus_relationships %>
-</div>
+<%= typus_relationships unless headless_mode? %>
 <% end %>
 
 <div class="grid_2">

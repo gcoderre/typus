@@ -1,10 +1,10 @@
-require "typus/orm/mongo/class_methods"
+require "typus/orm/mongoid/class_methods"
 
 class Hit
 
-  extend Typus::Orm::Mongo::ClassMethods
-
   if defined?(Mongoid)
+    extend Typus::Orm::Mongoid::ClassMethods
+    extend Typus::Orm::Base
     include Mongoid::Document
 
     field :name

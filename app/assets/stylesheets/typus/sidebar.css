@@ -18,7 +18,7 @@
 }
 
 #sidebar ul li {
-  padding:0.25em 0.50em;
+  padding:0.5em 0.50em;
   margin-bottom:0.5em;
   color:#32353a;
 }
@@ -26,7 +26,7 @@
 #sidebar ul ul li {
   list-style: none;
   padding-left: 1em;
-  padding-bottom:0.5em;
+  padding-bottom:1em;
   margin-bottom:0.5em;
   background: url("/assets/typus/sidebar-app-separator.gif") repeat-x center bottom;
 }

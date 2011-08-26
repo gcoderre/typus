@@ -17,10 +17,12 @@ module Admin::ResourcesHelper
 
     admin_user.application(app_name).each do |resource|
       klass = resource.constantize
-      resources[resource] = [sidebar_add_new(klass)].compact
+      if klass.typus_options_for(:hide_from_sidebar) == false
+        resources[resource] = [sidebar_add_new(klass)].compact
+      end
     end
 
-    render "helpers/admin/resources/sidebar", :resources => resources
+    render "helpers/admin/resources/sidebar", :resources => resources if resources.any?
   end
 
   def sidebar_add_new(klass)
